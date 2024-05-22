@@ -1,1 +1,1 @@
-We are contributing 2024CVPR and will update the code as soon as the results are available# ANP-FD
+The code will be released as soon as possible.
