@@ -450,7 +450,7 @@ class AttnBottleneck(nn.Module):
 
         return out
 
-class BN_layer(nn.Module):
+class FD_layer(nn.Module):
     def __init__(self,
                  block: Type[Union[BasicBlock, Bottleneck]],
                  layers: int,
@@ -458,7 +458,7 @@ class BN_layer(nn.Module):
                  width_per_group: int = 64,
                  norm_layer: Optional[Callable[..., nn.Module]] = None,
                  ):
-        super(BN_layer, self).__init__()
+        super(FD_layer, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         self._norm_layer = norm_layer
