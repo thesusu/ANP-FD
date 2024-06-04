@@ -76,21 +76,21 @@ def train(_class_):
     train_dataloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
     test_dataloader = torch.utils.data.DataLoader(test_data, batch_size=1, shuffle=False)
 
-    encoder, bn = wide_resnet50_2(pretrained=True)
+    encoder, FD = wide_resnet50_2(pretrained=True)
     encoder = encoder.to(device)
-    bn = bn.to(device)
+    FD = FD.to(device)
     encoder.eval()
     decoder = de_wide_resnet50_2(pretrained=False)
     decoder = decoder.to(device)
 
-    optimizer = torch.optim.Adam(list(decoder.parameters())+list(bn.parameters()), lr=learning_rate, betas=(0.5,0.999))
+    optimizer = torch.optim.Adam(list(decoder.parameters())+list(FD.parameters()), lr=learning_rate, betas=(0.5,0.999))
 
 
     se1 = SELayer(256, reduction_ratio=8).to(device)
     se2 = SELayer(512, reduction_ratio=8).to(device)
     se3 = SELayer(1024, reduction_ratio=8).to(device)
     for epoch in range(epochs):
-        bn.train()
+        FD.train()
         decoder.train()
         loss_list = []
         for img, label in train_dataloader:
