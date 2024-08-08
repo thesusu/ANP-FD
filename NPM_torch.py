@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-# Squeeze and Excitation block
+
 class MLP(nn.Module):
     def __init__(self, in_features, hidden_dim, out_features):
         super(MLP, self).__init__()
@@ -16,11 +16,9 @@ class MLP(nn.Module):
 
     def forward(self, x):
         residual = x
-        #print(residual.size())
+    
         x = self.fc1(x)
         x = self.relu(x)
-        x = self.fc11(x)
-        x =x + residual
         x = self.fc2(x)
         return x
 class SELayer(nn.Module):
@@ -48,8 +46,6 @@ class SELayer(nn.Module):
         output_tensor = torch.mul(input_tensor, fc_out_2.view(a, b, 1, 1))
         return output_tensor
 
-
-# SSPCAB implementation
 class NPM(nn.Module):
     def __init__(self, channels, kernel_dim=1, dilation=1, reduction_ratio=8):
 
