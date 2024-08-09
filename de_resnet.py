@@ -25,7 +25,7 @@ model_urls = {
     'wide_resnet101_2': 'https://download.pytorch.org/models/wide_resnet101_2-32ee1156.pth',
 }
 
-#  in_planes 和 out_planes 分别是输入和输出的通道数
+
 def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1) -> nn.Conv2d:
     """3x3 convolution with padding"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
@@ -132,7 +132,7 @@ class Bottleneck(nn.Module):
         self.upsample = upsample
         self.stride = stride
 
-    def forward(self, x: Tensor) -> Tensor:  # 函数参数中的冒号是参数的类型建议符，此处建议输入实参为Tensor类型函数,后面跟着的箭头是函数返回值的类型建议符，此处建议函数返回值类型为字典，键值类型分别str，Tensor。
+    def forward(self, x: Tensor) -> Tensor:  
         identity = x
 
         out = self.conv1(x)
@@ -249,9 +249,9 @@ class ResNet(nn.Module):
         #x = self.maxpool(x)
 
         feature_a = self.layer1(x)  # 512*8*8->256*16*16
-        # feature_1a = self.feature_jitter(feature_a, device, scale=0.001, prob=0.05)
+       
         feature_b = self.layer2(feature_a)  # 256*16*16->128*32*32
-        # feature_1b = self.feature_jitter(feature_b, device, scale=0.001, prob=0.5)
+       
         feature_c = self.layer3(feature_b)  # 128*32*32->64*64*64
         #feature_d = self.layer4(feature_c)  # 64*64*64->128*32*32
 
@@ -263,7 +263,7 @@ class ResNet(nn.Module):
     def feature_jitter(self, out, device, scale=0.001, prob=0.05):
         if random.uniform(0, 1) <= prob:
             N, C, H, W = out.shape
-            feat_norm = out.norm(p=2, dim=1).unsqueeze(dim=1) / C  ### p=2  2范数
+            feat_norm = out.norm(p=2, dim=1).unsqueeze(dim=1) / C  
             jitter = torch.randn((N, C, H, W)).to(device)
             jitter = jitter * feat_norm * scale
             out = out + jitter
