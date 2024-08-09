@@ -179,18 +179,18 @@ class ResNet(nn.Module):
         block: Type[Union[BasicBlock, Bottleneck]],
         layers: List[int],  # list,如resnet18是[2,2,2,2],resnet50是[3,4,6,3]
         num_classes: int = 1000,
-        zero_init_residual: bool = False,  # 在每个残差分支的最后一个BN层进行Zero-initialize，即残差的分支从0开始。
+        zero_init_residual: bool = False,  
         groups: int = 1,
         width_per_group: int = 64,
-        replace_stride_with_dilation: Optional[List[bool]] = None,  # 是否替换步长用膨胀率，默认值为[False, False, False]
-        norm_layer: Optional[Callable[..., nn.Module]] = None  # 标准化用的层，默认BatchNorm2d
+        replace_stride_with_dilation: Optional[List[bool]] = None, 
+        norm_layer: Optional[Callable[..., nn.Module]] = None  
     ) -> None:
         super(ResNet, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         self._norm_layer = norm_layer
 
-        self.inplanes = 64  # 每一个block的输入通道数目
+        self.inplanes = 64  
         self.dilation = 1
         if replace_stride_with_dilation is None:
             # each element in the tuple indicates if we should replace
@@ -201,13 +201,13 @@ class ResNet(nn.Module):
                              "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
         self.groups = groups
         self.base_width = width_per_group
-        # 网络输入部分
+        
         self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,
                                bias=False)
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        # 中间卷积部分
+        
         self.layer1 = self._make_layer(block, 64, layers[0])
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2,
                                        dilate=replace_stride_with_dilation[0])
@@ -215,7 +215,7 @@ class ResNet(nn.Module):
                                        dilate=replace_stride_with_dilation[1])
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
                                        dilate=replace_stride_with_dilation[2])
-        # 平均池化和全连接层
+        
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
@@ -307,7 +307,6 @@ class ResNet(nn.Module):
         feature_a = feature_1 + feature_a
         feature_b = feature_2 + feature_b
         feature_c = feature_3 + feature_c
-# T网络输出位置
 
         return [feature_a, feature_b, feature_c]
 
@@ -326,7 +325,7 @@ def _resnet(
     model = ResNet(block, layers, **kwargs)
     if pretrained:
         state_dict = load_state_dict_from_url(model_urls[arch],
-                                              progress=progress)  # 模型加载
+                                              progress=progress)  
         #for k,v in list(state_dict.items()):
         #    if 'layer4' in k or 'fc' in k:
         #        state_dict.pop(k)
@@ -401,14 +400,14 @@ class AttnBottleneck(nn.Module):
         groups: int = 1,
         base_width: int = 64,
         dilation: int = 1,
-        norm_layer: Optional[Callable[..., nn.Module]] = None,  # 标准化用的层，默认BatchNorm2d
+        norm_layer: Optional[Callable[..., nn.Module]] = None,  
         attention: bool = True,
     ) -> None:
-        super(AttnBottleneck, self).__init__()  # 定义各种层
+        super(AttnBottleneck, self).__init__()  
         self.attention = attention
         #print("Attention:",self.attention)
         if norm_layer is None:
-            norm_layer = nn.BatchNorm2d  # 数据归一化，一般在卷积层之后，relu之前
+            norm_layer = nn.BatchNorm2d  
         width = int(planes * (base_width / 64.)) * groups
         # Both self.conv2 and self.downsample layers downsample the input when stride != 1
         self.conv1 = conv1x1(inplanes, width)
@@ -425,7 +424,7 @@ class AttnBottleneck(nn.Module):
         self.downsample = downsample
         self.stride = stride
 
-    def forward(self, x: Tensor) -> Tensor:  # 各层的连接顺序
+    def forward(self, x: Tensor) -> Tensor:  
         if self.attention:
             x = self.cbam(x)
         identity = x
@@ -537,7 +536,7 @@ class FD_layer(nn.Module):
     def se_feature_jitter(self, out, device, scale=0.001, prob=0.05):
         if random.uniform(0, 1) <= prob:
             N, C, H, W = out.shape
-            feat_norm = out.norm(p=2, dim=1).unsqueeze(dim=1) / C  ### p=2  2范数
+            feat_norm = out.norm(p=2, dim=1).unsqueeze(dim=1) / C  
             jitter = torch.randn((N, C, H, W)).to(device)
             jitter = jitter * feat_norm * scale
             out = out + jitter
