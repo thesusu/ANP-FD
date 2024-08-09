@@ -4,23 +4,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
-
-class MLP(nn.Module):
-    def __init__(self, in_features, hidden_dim, out_features):
-        super(MLP, self).__init__()
-        self.fc1 = nn.Linear(in_features, hidden_dim)
-        self.relu = nn.ReLU()
-        self.fc11 = nn.Linear(hidden_dim, in_features)
-        self.fc2 = nn.Linear(in_features, out_features)
-
-    def forward(self, x):
-        residual = x
-    
-        x = self.fc1(x)
-        x = self.relu(x)
-        x = self.fc2(x)
-        return x
 class SELayer(nn.Module):
     def __init__(self, num_channels, reduction_ratio=8):
 
