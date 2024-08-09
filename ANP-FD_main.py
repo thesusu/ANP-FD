@@ -89,6 +89,9 @@ def train(_class_):
     se1 = SELayer(256, reduction_ratio=8).to(device)
     se2 = SELayer(512, reduction_ratio=8).to(device)
     se3 = SELayer(1024, reduction_ratio=8).to(device)
+    max_auroc_px = 0
+    max_auroc_sp = 0
+    max_aupro_px = 0
     for epoch in range(epochs):
         FD.train()
         decoder.train()
@@ -117,12 +120,28 @@ def train(_class_):
             loss_list.append(loss.item())
         print('epoch [{}/{}], loss:{:.4f}'.format(epoch + 1, epochs, np.mean(loss_list)))
 
+        print('epoch [{}/{}], loss:{:.4f}'.format(epoch + 1, epochs, np.mean(loss_list)))
+        #  1 auroc_px, auroc_sp, aupro_px = evaluation(encoder, bn, decoder, test_dataloader, device, CAT1, CAT2, CAT3)
         if (epoch + 1) % 1 == 0:
             auroc_px, auroc_sp, aupro_px = evaluation(encoder, bn, decoder, test_dataloader, device, se1, se2, se3)
             print('Pixel Auroc:{:.3f}, Sample Auroc{:.3f}, Pixel Aupro{:.3}'.format(auroc_px, auroc_sp, aupro_px))
+            results_file.write(
+                f'Epoch: {epoch + 1}, Pixel Auroc: {auroc_px:.3f}, Sample Auroc: {auroc_sp:.3f}, Pixel Aupro: {aupro_px:.3f}\n')
+
+            if auroc_px > max_auroc_px:
+                max_auroc_px = auroc_px
+            if auroc_sp > max_auroc_sp:
+                max_auroc_sp = auroc_sp
+            if aupro_px > max_aupro_px:
+                max_aupro_px = aupro_px
             torch.save({'bn': bn.state_dict(),
-                        'decoder': decoder.state_dict()}, ckp_path)
-    return auroc_px, auroc_sp, aupro_px
+                            'decoder': decoder.state_dict()}, ckp_path)
+        results_file.write(
+                f'Max Pixel Auroc: {max_auroc_px:.3f}, Max Sample Auroc: {max_auroc_sp:.3f}, Max Pixel Aupro: {max_aupro_px:.3f}\n'
+            )
+    results_file.close()
+
+    return max_auroc_px, max_auroc_sp, max_aupro_px
 
 
 
